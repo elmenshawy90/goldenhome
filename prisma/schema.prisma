@@ -1,0 +1,142 @@
+// Prisma Schema — GoldenHome Furniture & Mattresses
+// PostgreSQL + Prisma ORM
+// Tables: User, Category, Product, ProductImage, Offer, SiteSettings
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  STAFF
+}
+
+enum Availability {
+  IN_STOCK
+  OUT_OF_STOCK
+  PREORDER
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(ADMIN)
+  staffRoleId String?
+  staffRole StaffRole? @relation(fields: [staffRoleId], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([staffRoleId])
+}
+
+// Custom staff roles with granular permissions (permissions = string[] like ["products","offers"])
+model StaffRole {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  label       String
+  permissions Json     @default("[]")
+  isSystem    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  users       User[]
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String
+  slug        String    @unique
+  description String?
+  coverImage  String?
+  sortOrder   Int       @default(0)
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  products    Product[]
+}
+
+model Product {
+  id                 String       @id @default(cuid())
+  name               String
+  slug               String       @unique
+  categoryId         String
+  category           Category     @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  description        String?
+  price              Int
+  oldPrice           Int?
+  discountPercentage Int?         @default(0)
+  isOnSale           Boolean      @default(false)
+  size               String?
+  color              String?
+  material           String?
+  specifications     String?
+  availability       Availability @default(IN_STOCK)
+  isFeatured         Boolean      @default(false)
+  isNew              Boolean      @default(false)
+  isActive           Boolean      @default(true)
+  views              Int          @default(0)
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+  images             ProductImage[]
+  offers             Offer[]      @relation("ProductOffers")
+
+  @@index([categoryId])
+  @@index([isOnSale])
+  @@index([isFeatured])
+  @@index([price])
+}
+
+model ProductImage {
+  id        String   @id @default(cuid())
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  url       String
+  alt       String?
+  isMain    Boolean  @default(false)
+  sortOrder Int      @default(0)
+  createdAt DateTime @default(now())
+
+  @@index([productId])
+}
+
+model Offer {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  discountPercentage Int?
+  oldPrice    Int?
+  newPrice    Int?
+  productId   String?
+  product     Product?  @relation("ProductOffers", fields: [productId], references: [id], onDelete: SetNull)
+  image       String?
+  startsAt    DateTime?
+  endsAt      DateTime?
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([productId])
+  @@index([isActive])
+}
+
+// Singleton row (id = "site") — contact details, branches, socials editable from /admin/settings
+model SiteSettings {
+  id           String   @id @default("site")
+  phone        String   @default("01000000000")
+  whatsapp     String   @default("201000000000")
+  address      String   @default("القاهرة — شارع الأثاث، دمياط الجديدة")
+  workingHours String   @default("يوميًا من 11ص إلى 11م")
+  topStrip     String   @default("توصيل وتركيب مجاني داخل القاهرة • ضمان حتى 10 سنوات")
+  facebook     String?
+  instagram    String?
+  tiktok       String?
+  about        String?
+  branches     Json     @default("[]")
+  updatedAt    DateTime @updatedAt
+}
