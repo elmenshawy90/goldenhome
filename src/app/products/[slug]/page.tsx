@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { getProductBySlug, getRelated } from "@/lib/data";
+import { getProductBySlug, getRelated, getSettings } from "@/lib/data";
 import ProductCard from "@/components/ProductCard";
 import { availabilityLabel, formatEGP } from "@/lib/utils";
 import Gallery from "./Gallery";
@@ -26,8 +26,9 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 export default async function ProductPage({ params }: { params: { slug: string } }) {
   const p = await getProductBySlug(params.slug);
   if (!p || !p.isActive) return notFound();
-  const related = await getRelated(p, 4);
-  const wa = `https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP ?? "201000000000"}?text=${encodeURIComponent(
+  const [related, settings] = await Promise.all([getRelated(p, 4), getSettings()]);
+  const waNumber = settings.whatsapp;
+  const wa = `https://wa.me/${waNumber}?text=${encodeURIComponent(
     `أريد طلب: ${p.name} — ${formatEGP(p.price)} (كود: ${p.slug})`
   )}`;
 
@@ -112,7 +113,7 @@ export default async function ProductPage({ params }: { params: { slug: string }
           <h2 className="mb-4 text-xl font-black">منتجات مشابهة</h2>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {related.map((r) => (
-              <ProductCard key={r.id} p={r} />
+              <ProductCard key={r.id} p={r} whatsapp={waNumber} />
             ))}
           </div>
         </section>

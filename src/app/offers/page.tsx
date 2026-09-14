@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { Metadata } from "next";
-import { getOffers, getProducts } from "@/lib/data";
+import { getOffers, getProducts, getSettings } from "@/lib/data";
 import ProductCard from "@/components/ProductCard";
 import { formatEGP } from "@/lib/utils";
 
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export const dynamic = "force-dynamic";
 
 export default async function OffersPage() {
-  const [offers, sale] = await Promise.all([getOffers(true), getProducts({ onSale: true, limit: 24 })]);
+  const [offers, sale, settings] = await Promise.all([getOffers(true), getProducts({ onSale: true, limit: 24 }), getSettings()]);
   return (
     <div className="container-x py-6">
       <h1 className="text-2xl font-black md:text-3xl">العروض الحالية 🔥</h1>
@@ -51,7 +51,7 @@ export default async function OffersPage() {
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {sale.map((p) => (
-            <ProductCard key={p.id} p={p} />
+            <ProductCard key={p.id} p={p} whatsapp={settings.whatsapp} />
           ))}
         </div>
       )}

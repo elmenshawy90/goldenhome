@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getCategories, getProducts } from "@/lib/data";
+import { getCategories, getProducts, getSettings } from "@/lib/data";
 import CategoryView from "@/components/CategoryView";
 
 export const metadata: Metadata = { title: "البحث | جولدن هوم" };
@@ -7,9 +7,10 @@ export const dynamic = "force-dynamic";
 
 export default async function SearchPage({ searchParams }: { searchParams: { q?: string } }) {
   const q = searchParams.q ?? "";
-  const [products, categories] = await Promise.all([
+  const [products, categories, settings] = await Promise.all([
     getProducts(q ? { q } : { limit: 24 }),
     getCategories(true),
+    getSettings(),
   ]);
   return (
     <div className="container-x py-6">
@@ -27,7 +28,7 @@ export default async function SearchPage({ searchParams }: { searchParams: { q?:
         ))}
       </div>
       <div className="mt-6">
-        <CategoryView products={products} />
+        <CategoryView products={products} whatsapp={settings.whatsapp} />
       </div>
     </div>
   );

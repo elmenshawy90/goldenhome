@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getCategories, getOffers, getProducts } from "@/lib/data";
+import { getCategories, getOffers, getProducts, getSettings } from "@/lib/data";
 import ProductCard from "@/components/ProductCard";
 import CategoryCard from "@/components/CategoryCard";
 import { formatEGP } from "@/lib/utils";
@@ -7,13 +7,15 @@ import { formatEGP } from "@/lib/utils";
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const [categories, featured, newest, onSale, offers] = await Promise.all([
+  const [categories, featured, newest, onSale, offers, settings] = await Promise.all([
     getCategories(true),
     getProducts({ featured: true, limit: 8 }),
     getProducts({ limit: 8 }),
     getProducts({ onSale: true, limit: 8 }),
     getOffers(true),
+    getSettings(),
   ]);
+  const waNumber = settings.whatsapp;
 
   const bedroomOffer = onSale.find((p) => p.category?.slug === "bedrooms");
   const mattresses = await getProducts({ categorySlug: "mattresses", limit: 4 });
@@ -97,7 +99,7 @@ export default async function HomePage() {
         </div>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {featured.map((p) => (
-            <ProductCard key={p.id} p={p} />
+            <ProductCard key={p.id} p={p} whatsapp={waNumber} />
           ))}
         </div>
       </section>
@@ -150,7 +152,7 @@ export default async function HomePage() {
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {onSale.map((p) => (
-              <ProductCard key={p.id} p={p} />
+              <ProductCard key={p.id} p={p} whatsapp={waNumber} />
             ))}
           </div>
         )}
@@ -170,7 +172,7 @@ export default async function HomePage() {
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {mattresses.map((p) => (
-              <ProductCard key={p.id} p={p} />
+              <ProductCard key={p.id} p={p} whatsapp={waNumber} />
             ))}
           </div>
         </div>
@@ -181,7 +183,7 @@ export default async function HomePage() {
         <h2 className="mb-4 text-2xl font-black">أحدث المنتجات 🆕</h2>
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {newest.map((p) => (
-            <ProductCard key={p.id} p={p} />
+            <ProductCard key={p.id} p={p} whatsapp={waNumber} />
           ))}
         </div>
       </section>
@@ -195,7 +197,7 @@ export default async function HomePage() {
           </p>
           <div className="mt-5 flex justify-center gap-3">
             <a
-              href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP ?? "201000000000"}?text=${encodeURIComponent("أريد استشارة مجانية لاختيار الأثاث")}`}
+              href={`https://wa.me/${waNumber}?text=${encodeURIComponent("أريد استشارة مجانية لاختيار الأثاث")}`}
               target="_blank"
               className="btn-primary !bg-amber-400 !text-brand-900"
             >

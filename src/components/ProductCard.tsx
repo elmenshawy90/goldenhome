@@ -2,7 +2,8 @@ import Link from "next/link";
 import type { ProductRow } from "@/lib/store";
 import { availabilityLabel, cn, formatEGP } from "@/lib/utils";
 
-export default function ProductCard({ p }: { p: ProductRow }) {
+export default function ProductCard({ p, whatsapp }: { p: ProductRow; whatsapp?: string }) {
+  const waNumber = whatsapp ?? process.env.NEXT_PUBLIC_WHATSAPP ?? "201000000000";
   const img = p.images.find((i) => i.isMain)?.url ?? p.images[0]?.url ?? "/placeholder.svg";
   const discount = p.discountPercentage || 0;
   return (
@@ -41,7 +42,7 @@ export default function ProductCard({ p }: { p: ProductRow }) {
             عرض التفاصيل
           </Link>
           <a
-            href={`https://wa.me/${process.env.NEXT_PUBLIC_WHATSAPP ?? "201000000000"}?text=${encodeURIComponent(
+            href={`https://wa.me/${waNumber}?text=${encodeURIComponent(
               `أريد الاستفسار عن: ${p.name} — ${formatEGP(p.price)}`
             )}`}
             target="_blank"

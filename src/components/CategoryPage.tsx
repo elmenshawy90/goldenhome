@@ -1,14 +1,15 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
-import { getCategoryBySlug, getProducts } from "@/lib/data";
+import { getCategoryBySlug, getProducts, getSettings } from "@/lib/data";
 import CategoryView from "@/components/CategoryView";
 
 export const dynamic = "force-dynamic";
 
 async function CategoryPage({ slug, title }: { slug: string; title: string }) {
-  const [cat, products] = await Promise.all([
+  const [cat, products, settings] = await Promise.all([
     getCategoryBySlug(slug),
     getProducts({ categorySlug: slug }),
+    getSettings(),
   ]);
   if (!cat) return notFound();
   return (
@@ -27,7 +28,7 @@ async function CategoryPage({ slug, title }: { slug: string; title: string }) {
         </div>
       </div>
       <div className="mt-6">
-        <CategoryView products={products} />
+        <CategoryView products={products} whatsapp={settings.whatsapp} />
       </div>
     </div>
   );

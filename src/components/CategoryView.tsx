@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import ProductCard, { EmptyState } from "@/components/ProductCard";
 import type { ProductRow } from "@/lib/store";
 
-export default function CategoryView({ products }: { products: ProductRow[] }) {
+export default function CategoryView({ products, whatsapp }: { products: ProductRow[]; whatsapp?: string }) {
   const [q, setQ] = useState("");
   const [onlySale, setOnlySale] = useState(false);
   const [avail, setAvail] = useState("");
@@ -98,7 +98,7 @@ export default function CategoryView({ products }: { products: ProductRow[] }) {
         ) : (
           <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {list.map((p) => (
-              <ProductCard key={p.id} p={p} />
+              <ProductCard key={p.id} p={p} whatsapp={whatsapp} />
             ))}
           </div>
         )}
