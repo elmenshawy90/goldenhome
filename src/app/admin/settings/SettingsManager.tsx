@@ -47,8 +47,14 @@ export default function SettingsManager({ initial }: { initial: SettingsRow }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...form, branches }),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "فشل الحفظ");
+      const text = await res.text();
+      let data: { error?: string } = {};
+      try {
+        data = text ? (JSON.parse(text) as typeof data) : {};
+      } catch {
+        throw new Error(`استجابة غير صالحة من الخادم (HTTP ${res.status})`);
+      }
+      if (!res.ok) throw new Error(data.error || `فشل الحفظ (HTTP ${res.status})`);
       setMsg("تم الحفظ ✅");
       router.refresh();
     } catch (e: unknown) {
